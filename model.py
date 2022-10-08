@@ -53,7 +53,7 @@ def make_model(input_shape, num_classes):
         units = 1
     else:
         activation = "softmax"
-        units = num_classes
+        units = 1
 
     x = layers.Dropout(0.5)(x)
     outputs = layers.Dense(units, activation=activation)(x)
@@ -69,7 +69,14 @@ train_ds = tf.keras.preprocessing.image_dataset_from_directory(
     image_size=image_size,
     batch_size=batch_size,
 )
-
+val_ds = tf.keras.preprocessing.image_dataset_from_directory(
+    "train",
+    validation_split=0.2,
+    subset="validation",
+    seed=1337,
+    image_size=image_size,
+    batch_size=batch_size,
+)
 
 plt.figure(figsize=(10, 10))
 for images, labels in train_ds.take(1):
@@ -84,7 +91,8 @@ print("RUNNING")
 train_ds = train_ds.prefetch(buffer_size=32)
 
 
-model = make_model(input_shape=image_size + (3,), num_classes=2)
+model = make_model(input_shape=image_size + (3,), num_classes=24)
+print("MOdel made")
 keras.utils.plot_model(model, show_shapes=True)
 
 epochs = 50
@@ -97,8 +105,10 @@ model.compile(
     loss="binary_crossentropy",
     metrics=["accuracy"],
 )
+print("Model compiled")
 model.fit(
     train_ds, epochs=epochs, callbacks=callbacks, validation_data=val_ds,
 )
+print("Model Fitted")
 
 plt.show()
